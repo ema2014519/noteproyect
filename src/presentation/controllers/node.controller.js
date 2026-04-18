@@ -4,7 +4,7 @@ export default class NodeController {
     }
     createNode = async (req, res) => {
         const noteData = req.body;
-        if (req.file) noteData.imageurl = '/uploads/' + req.file.filename;
+        if (req.file) noteData.imageUrl = '/uploads/' + req.file.filename;
         noteData.userid = 'user_123';
         try {
             const newNote = await this.noteService.createNote(noteData);
