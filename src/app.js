@@ -6,12 +6,15 @@ import morgan from 'morgan';
 import { loggerMiddleware } from './presentation/middlewares/logger.middleware.js';
 import noteRoutes from './presentation/routes/note.routes.js';
 import authRoutes from './presentation/routes/auth.routes.js';
+import systemRoutes from './presentation/routes/system.routes.js';
 import { connectMongo } from './infrastructure/database/mongo/connection.js';
 import { connectMysql } from './infrastructure/database/mysql/connection.js';
 import { setupSwagger } from './infrastructure/config/swagger.config.js'; 
 
-await connectMongo();
-await connectMysql();
+if (process.env.NODE_ENV !== 'test') {
+    await connectMongo();
+    await connectMysql();
+}
  
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,12 +27,9 @@ app.use(morgan('dev'));
  
 //imagenes estaticas
 app.use('/uploads', express.static('uploads'));
+app.use('/api', systemRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/notes', noteRoutes);
- 
-app.get('/api/health', (req, res) => {
-    res.status(200).json({ status: 'OK',message: 'API de notas activa' });
-});
  
  
  
@@ -41,6 +41,10 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor escuchando en el puerto ${PORT}`);
-});
+export default app;
+
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`Servidor escuchando en el puerto ${PORT}`);
+    });
+}
